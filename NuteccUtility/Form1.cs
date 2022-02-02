@@ -71,6 +71,8 @@ namespace NuteccUtility
                 //Calculando a média das frequencias cardiacas lidas e armazenadas
                 media = somaFc / count;
 
+                lblGini.Text = CalculaGini(vetvfc).ToString();
+
                 chartFC.ChartAreas[0].AxisY.Minimum = vetvfc.Min() - 20;
                 chartFC.ChartAreas[0].AxisY.Maximum = vetvfc.Max() + 20;
                 chartFC.ChartAreas[0].AxisX.MajorGrid.Enabled = false;
@@ -164,6 +166,61 @@ namespace NuteccUtility
             {
                 MessageBox.Show("Arquivo inválido");
             }
+        }
+
+        private double CalculaGini(List<double> list)
+        {
+            List<int> somatorioAcumulado = new List<int>();
+            List<double> qtdXMs = new List<double>();
+            List<double> somatorioAcumuladoMult = new List<double>();
+            List<double> porcentagemTotal = new List<double>();
+            List<double> porcentagemMenosSomatorioAcumulado = new List<double>();
+
+            List<GrupoCoeficiente> lstAgrupado = list
+                .GroupBy(i => i)
+                .Select(j => new GrupoCoeficiente()
+                {
+                    qtd = j.Count(),
+                    ms = j.First()
+                })
+                .ToList();
+
+            for (int i = 0; i < lstAgrupado.Count(); i++)
+            {
+                if (i > 0)
+                    somatorioAcumulado.Add(lstAgrupado[i].qtd + somatorioAcumulado[i - 1]);
+                else
+                    somatorioAcumulado.Add(lstAgrupado[i].qtd);
+
+                qtdXMs.Add(lstAgrupado[i].qtd * lstAgrupado[i].ms);
+            }
+
+
+            for (int i = 0; i < qtdXMs.Count(); i++)
+            {
+                if (i > 0)
+                    somatorioAcumuladoMult.Add(qtdXMs[i] + somatorioAcumuladoMult[i - 1]);
+                else
+                    somatorioAcumuladoMult.Add(qtdXMs[i]);
+            }
+
+            var somatoriaQtdXMs = qtdXMs.Sum();
+
+            for (int i = 0; i < somatorioAcumuladoMult.Count(); i++)
+            {
+                porcentagemTotal.Add((somatorioAcumuladoMult[i] / somatoriaQtdXMs) * 100);
+            }
+
+            for (int i = 0; i < porcentagemTotal.Count(); i++)
+            {
+                porcentagemMenosSomatorioAcumulado.Add(somatorioAcumulado[i] - porcentagemTotal[i]);
+            }
+
+            var somatoriaPorcentagemAcumulada = porcentagemMenosSomatorioAcumulado.Sum();
+
+            var indiceGini = somatoriaPorcentagemAcumulada / (somatorioAcumulado.Sum() - 100);
+
+            return indiceGini;
         }
     }
 }
