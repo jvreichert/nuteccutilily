@@ -165,11 +165,6 @@ namespace NuteccUtility
             }
         }
 
-        private void CalculaSimbolica(List<double> list)
-        {
-
-        }
-
         private double CalculaGini(List<double> list)
         {
             var listSort = list.OrderBy(d => d).ToList();
