@@ -22,7 +22,6 @@ namespace WindowsFormsApp1
 
         public static int id = 0;
         public static string nome = "Selecione o Paciente";
-        public static int idade;
         public static double pnn50;
     }
 }
