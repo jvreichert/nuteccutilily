@@ -32,6 +32,9 @@ namespace NuteccUtility
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
             System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
             System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.btnOpenTxt = new System.Windows.Forms.Button();
             this.listBox1 = new System.Windows.Forms.ListBox();
             this.listBox2 = new System.Windows.Forms.ListBox();
@@ -50,8 +53,10 @@ namespace NuteccUtility
             this.chartFC = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.label1 = new System.Windows.Forms.Label();
             this.lblGini = new System.Windows.Forms.Label();
+            this.chartGini = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chartFC)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.chartGini)).BeginInit();
             this.SuspendLayout();
             // 
             // btnOpenTxt
@@ -208,6 +213,9 @@ namespace NuteccUtility
             // 
             // chartFC
             // 
+            chartArea1.AxisX.MajorGrid.Enabled = false;
+            chartArea1.AxisX2.MajorGrid.Enabled = false;
+            chartArea1.AxisY.MajorGrid.Enabled = false;
             chartArea1.BorderColor = System.Drawing.Color.Transparent;
             chartArea1.Name = "ChartArea1";
             this.chartFC.ChartAreas.Add(chartArea1);
@@ -246,11 +254,37 @@ namespace NuteccUtility
             this.lblGini.TabIndex = 7;
             this.lblGini.Text = "....";
             // 
+            // chartGini
+            // 
+            chartArea2.AxisX.MajorGrid.Enabled = false;
+            chartArea2.AxisX2.MajorGrid.Enabled = false;
+            chartArea2.AxisY.MajorGrid.Enabled = false;
+            chartArea2.BorderColor = System.Drawing.Color.Transparent;
+            chartArea2.Name = "ChartArea1";
+            this.chartGini.ChartAreas.Add(chartArea2);
+            legend2.BorderDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.NotSet;
+            legend2.HeaderSeparatorColor = System.Drawing.Color.Transparent;
+            legend2.ItemColumnSeparatorColor = System.Drawing.Color.Transparent;
+            legend2.Name = "Legend1";
+            this.chartGini.Legends.Add(legend2);
+            this.chartGini.Location = new System.Drawing.Point(716, 279);
+            this.chartGini.Name = "chartGini";
+            series2.ChartArea = "ChartArea1";
+            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series2.LabelForeColor = System.Drawing.Color.Transparent;
+            series2.Legend = "Legend1";
+            series2.Name = "Series1";
+            this.chartGini.Series.Add(series2);
+            this.chartGini.Size = new System.Drawing.Size(632, 388);
+            this.chartGini.TabIndex = 8;
+            this.chartGini.Text = "chart1";
+            // 
             // frmnuteccutility
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1708, 679);
+            this.Controls.Add(this.chartGini);
             this.Controls.Add(this.lblGini);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.chartFC);
@@ -265,6 +299,7 @@ namespace NuteccUtility
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chartFC)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.chartGini)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -290,6 +325,7 @@ namespace NuteccUtility
         private System.Windows.Forms.DataVisualization.Charting.Chart chartFC;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label lblGini;
+        private System.Windows.Forms.DataVisualization.Charting.Chart chartGini;
     }
 }
 

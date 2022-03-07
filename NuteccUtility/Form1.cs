@@ -71,14 +71,11 @@ namespace NuteccUtility
                 //Calculando a média das frequencias cardiacas lidas e armazenadas
                 media = somaFc / count;
 
-                lblGini.Text = CalculaGini(vetvfc).ToString();
+                lblGini.Text = String.Format("{0:0.0000}", CalculaGini(vetvfc));
 
                 chartFC.ChartAreas[0].AxisY.Minimum = vetvfc.Min() - 20;
                 chartFC.ChartAreas[0].AxisY.Maximum = vetvfc.Max() + 20;
-                chartFC.ChartAreas[0].AxisX.MajorGrid.Enabled = false;
-                chartFC.ChartAreas[0].AxisX.MinorGrid.Enabled = false;
-                chartFC.ChartAreas[0].AxisY.MajorGrid.Enabled = false;
-                chartFC.ChartAreas[0].AxisY.MinorGrid.Enabled = false;
+
 
                 //Calculando o Desvio e o quadrado do desvio para então chegar no desvio padrão
                 for (int i = 0; i < count; i++)
@@ -168,59 +165,115 @@ namespace NuteccUtility
             }
         }
 
+        private void CalculaSimbolica(List<double> list)
+        {
+
+        }
+
         private double CalculaGini(List<double> list)
         {
-            List<int> somatorioAcumulado = new List<int>();
-            List<double> qtdXMs = new List<double>();
-            List<double> somatorioAcumuladoMult = new List<double>();
-            List<double> porcentagemTotal = new List<double>();
-            List<double> porcentagemMenosSomatorioAcumulado = new List<double>();
+            var listSort = list.OrderBy(d => d).ToList();
+            var listSortArray = listSort.ToArray();
 
-            List<GrupoCoeficiente> lstAgrupado = list
-                .GroupBy(i => i)
-                .Select(j => new GrupoCoeficiente()
-                {
-                    qtd = j.Count(),
-                    ms = j.First()
-                })
-                .ToList();
+            var total = list.Count();
 
-            for (int i = 0; i < lstAgrupado.Count(); i++)
+            var x1 = new List<double>()
             {
-                if (i > 0)
-                    somatorioAcumulado.Add(lstAgrupado[i].qtd + somatorioAcumulado[i - 1]);
-                else
-                    somatorioAcumulado.Add(lstAgrupado[i].qtd);
+                0.02,
+                0.18,
+                0.3,
+                0.5
+            };
 
-                qtdXMs.Add(lstAgrupado[i].qtd * lstAgrupado[i].ms);
-            }
-
-
-            for (int i = 0; i < qtdXMs.Count(); i++)
+            var x2 = new List<double>()
             {
-                if (i > 0)
-                    somatorioAcumuladoMult.Add(qtdXMs[i] + somatorioAcumuladoMult[i - 1]);
-                else
-                    somatorioAcumuladoMult.Add(qtdXMs[i]);
-            }
+                  Percentile(listSortArray, x1[0]) + 0.1,
+                  Percentile(listSortArray, x1[0] + x1[1]) + 0.1,
+                  Percentile(listSortArray, x1[0] + x1[1] + x1[2]) + 0.1,
+                  Percentile(listSortArray, x1[0] + x1[1] + x1[2]+ x1[3]),
+            };
 
-            var somatoriaQtdXMs = qtdXMs.Sum();
-
-            for (int i = 0; i < somatorioAcumuladoMult.Count(); i++)
+            var x3 = new List<double>()
             {
-                porcentagemTotal.Add((somatorioAcumuladoMult[i] / somatoriaQtdXMs) * 100);
-            }
+                listSort.Where(x => x <= x2[0]).Count(),
+                listSort.Where(x => x > x2[0] && x < x2[1] - 0.1).Count(),
+                listSort.Where(x => x >= x2[1] - 0.1 && x <= x2[2] - 0.1).Count(),
+                listSort.Where(x => x > x2[2]).Count()
+            };
 
-            for (int i = 0; i < porcentagemTotal.Count(); i++)
+            var x4 = new List<double>()
             {
-                porcentagemMenosSomatorioAcumulado.Add(somatorioAcumulado[i] - porcentagemTotal[i]);
+                x3[0] / total,
+                x3[1] / total,
+                x3[2] / total,
+                x3[3] / total
+            };
+
+            var x5 = new List<double>()
+            {
+                x4[0],
+                x4[0] + x4[1],
+                x4[0] + x4[1] + x4[2],
+                x4[0] + x4[1] + x4[2] + x4[3],
+            };
+
+            var x6 = new List<double>()
+            {
+                1 - x5[0],
+                1 - x5[1],
+                1 - x5[2],
+                1 - x5[3],
+            };
+
+            var x7 = new List<double>()
+            {
+                x1[0] * (x4[0] + 2 * x6[0]),
+                x1[1] * (x4[1] + 2 * x6[1]),
+                x1[2] * (x4[2] + 2 * x6[2]),
+                x1[3] * (x4[3] + 2 * x6[3])
+            };
+
+            var somatorio = x7.Sum();
+
+            //Grafico Gini
+
+            chartGini.DataSource = new List<double>();
+            chartGini.Series.Clear();
+            chartGini.Series.Add("G");
+            chartGini.Series.Add("G1");
+            chartGini.Series["G"].ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            chartGini.Series["G1"].ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+
+            chartGini.Series["G"].Points.AddXY(x4[0] * 10, 0.1);
+
+            chartGini.Series["G"].Points.AddXY(x4[1] * 10, 0.18);
+
+            chartGini.Series["G"].Points.AddXY(x4[2] * 10, 0.3);
+
+            chartGini.Series["G"].Points.AddXY(x4[3] * 10, 0.5);
+
+            chartGini.Series["G1"].Points.AddXY(x4[0] * 10, 0.1);
+            chartGini.Series["G1"].Points.AddXY(x4[3] * 10, 0.5);
+
+            //################
+
+            return 1 - somatorio;
+        }
+
+        public double Percentile(double[] sequence, double excelPercentile)
+        {
+            Array.Sort(sequence);
+            int N = sequence.Length;
+            double n = (N - 1) * excelPercentile + 1;
+            // Another method: double n = (N + 1) * excelPercentile;
+            if (n == 1d) return sequence[0];
+            else if (n == N) return sequence[N - 1];
+            else
+            {
+                int k = (int)n;
+                double d = n - k;
+                return sequence[k - 1] + d * (sequence[k] - sequence[k - 1]);
             }
-
-            var somatoriaPorcentagemAcumulada = porcentagemMenosSomatorioAcumulado.Sum();
-
-            var indiceGini = somatoriaPorcentagemAcumulada / (somatorioAcumulado.Sum() - 100);
-
-            return indiceGini;
         }
     }
 }
