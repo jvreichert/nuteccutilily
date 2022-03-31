@@ -68,14 +68,16 @@ namespace NuteccUtility
 
                     }
                 }
+
                 //Calculando a média das frequencias cardiacas lidas e armazenadas
                 media = somaFc / count;
 
                 lblGini.Text = String.Format("{0:0.0000}", CalculaGini(vetvfc));
 
+                CalculaSimbolica(vetvfc);
+
                 chartFC.ChartAreas[0].AxisY.Minimum = vetvfc.Min() - 20;
                 chartFC.ChartAreas[0].AxisY.Maximum = vetvfc.Max() + 20;
-
 
                 //Calculando o Desvio e o quadrado do desvio para então chegar no desvio padrão
                 for (int i = 0; i < count; i++)
@@ -157,12 +159,118 @@ namespace NuteccUtility
                 }
 
                 lblmtc.Text = (somatoriodraio / (vetvfc.Count - 2)).ToString();
-
             }
             else
             {
                 MessageBox.Show("Arquivo inválido");
             }
+        }
+
+        private void CalculaSimbolica(List<double> list)
+        {
+            var total = list.Count();
+
+            var LI1 = list.ToList();
+            var LI2 = list.ToList();
+            var LI3 = list.ToList();
+
+            LI1.RemoveAt(0);
+            LI2.RemoveRange(0, 2);
+            LI3.RemoveRange(0, 3);
+
+            List<double> SI1 = new List<double>();
+            List<double> SI2 = new List<double>();
+            List<double> SI3 = new List<double>();
+
+            List<double> _0v = new List<double>();
+            List<double> _1v = new List<double>();
+            List<double> _2v = new List<double>();
+
+            List<double> Somatorio = new List<double>();
+
+            List<string> Palavras = new List<string>();
+
+            for (int i = 0; i < total - 3; i++)
+            {
+                var aux1 = Math.Abs(list[i] - LI1[i]);
+                var aux2 = Math.Abs(LI1[i] - LI2[i]);
+                var aux3 = Math.Abs(LI2[i] - LI3[i]);
+
+                var si1 = aux1 <= 10 ? 0 : aux1 <= 20 ? 1 : aux1 <= 30 ? 2 : aux1 <= 40 ? 3 : aux1 < 50 ? 4 : 5;
+                var si2 = aux2 <= 10 ? 0 : aux2 <= 20 ? 1 : aux2 <= 30 ? 2 : aux2 <= 40 ? 3 : aux2 < 50 ? 4 : 5;
+                var si3 = aux3 <= 10 ? 0 : aux3 <= 20 ? 1 : aux3 <= 30 ? 2 : aux3 <= 40 ? 3 : aux3 < 50 ? 4 : 5;
+
+                Somatorio.Add(si1 + si2 + si3);
+
+                SI1.Add(si1);
+                SI2.Add(si2);
+                SI3.Add(si3);
+
+                if (si1 == si2 && si2 == si3)
+                    _0v.Add(1);
+                else
+                    _0v.Add(0);
+
+                if (si1 != si2 && si2 != si3)
+                    _2v.Add(1);
+                else
+                    _2v.Add(0);
+
+                if (_0v[i] + _2v[i] == 0)
+                    _1v.Add(1);
+                else
+                    _1v.Add(0);
+
+                Palavras.Add(si1.ToString() + si2.ToString() + si3.ToString());
+            }
+
+            var somaSomatorio = Somatorio.Sum();
+
+            var media0V = (_0v.Sum() / (total - 3)) * 100;
+            var media1V = (_1v.Sum() / (total - 3)) * 100;
+            var media2V = (_2v.Sum() / (total - 3)) * 100;
+
+
+            List<int> N = new List<int>();
+
+            foreach (var x in Program.sequencia)
+            {
+                N.Add(Palavras.Where(y => y == x).Count());
+            }
+
+            List<double> eBase2 = new List<double>();
+            List<double> eBase10 = new List<double>();
+
+            for (int i = 0; i < Program.sequencia.Count(); i++)
+            {
+                if (N[i] != 0)
+                {
+                    double divisao = Double.Parse(N[i].ToString()) / (total - 3);
+
+                    var entropiaBase2 = divisao * Math.Log(divisao, 2);
+                    var entropiaBase10 = divisao * Math.Log10(divisao);
+
+
+                    eBase2.Add(entropiaBase2);
+                    eBase10.Add(entropiaBase10);
+                }
+                else
+                {
+                    eBase2.Add(0);
+                }
+            }
+
+            var entr2 = eBase2.Sum() * -1;
+            var entr10 = eBase10.Sum() * -1;
+
+
+
+            lbl0v.Text = media0V.ToString();
+            lbl1v.Text = media1V.ToString();
+            lbl2v.Text = media2V.ToString();
+
+            lblentr2.Text = entr2.ToString();
+            lblentr10.Text = entr10.ToString();
         }
 
         private double CalculaGini(List<double> list)
@@ -185,7 +293,7 @@ namespace NuteccUtility
                   Percentile(listSortArray, x1[0]) + 0.1,
                   Percentile(listSortArray, x1[0] + x1[1]) + 0.1,
                   Percentile(listSortArray, x1[0] + x1[1] + x1[2]) + 0.1,
-                  Percentile(listSortArray, x1[0] + x1[1] + x1[2]+ x1[3]),
+                  Percentile(listSortArray, x1[0] + x1[1] + x1[2] + x1[3]),
             };
 
             var x3 = new List<double>()
@@ -252,7 +360,7 @@ namespace NuteccUtility
 
             //################
 
-            return 1 - somatorio;
+            return Math.Abs(1 - somatorio);
         }
 
         public double Percentile(double[] sequence, double excelPercentile)
